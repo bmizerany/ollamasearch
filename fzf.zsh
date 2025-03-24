@@ -1,22 +1,22 @@
 _fzf_complete_ollama() {
       local -a tokens
       tokens=(${(z)1})
-      case ${tokens[-1]} in
+      case ${tokens[2]} in
         pull|run)
-            # Use blake.io/ollamasearch for ollama pull
+            # Use ollamasearch for ollama pull with wrapper
             _fzf_complete \
                 --prompt="ollamasearch> " \
-                --bind 'start:reload:ollamasearch ""' \
+                --bind 'start:reload:ollamasearch {q}' \
                 --bind 'change:reload:ollamasearch {q}' \
                 --ansi \
                 --disabled \
-                -- "$@" < <(ollamasearch "$@")
-            ;;
+                -- "$@" < <(ollamasearch "${tokens[@]:2}")
+             ;;
         *)
-            _fzf_complete \
-                --prompt="ollama> " \
-                --ansi \
-                -- "$@" < <(ollama ls)
+        _fzf_complete \
+            --prompt="ollama> " \
+            --ansi \
+            -- "$@" < <(ollama ls)
     esac
 }
 

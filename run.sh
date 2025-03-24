@@ -1,1 +1,1 @@
-go run . "gemma"
+go run . "has:vision gemma"

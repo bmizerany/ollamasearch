@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"flag"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -26,22 +25,20 @@ func main() {
 var errUsage = errors.New("Usage: ollamasearch <query>")
 
 func Main() error {
-	flag.Parse()
-	if flag.NArg() == 0 {
-		return errUsage
-	}
-
+	var b strings.Builder
 	p := url.Values{}
-	args := slices.Clone(flag.Args())
-	for i, arg := range flag.Args() {
+	args := slices.Clone(os.Args[1:])
+	for i, arg := range args {
 		c, ok := strings.CutPrefix(arg, "has:")
 		if ok {
 			args[i] = "" // do not include in query
 			p.Add("c", c)
+		} else {
+			b.WriteString(arg)
+			b.WriteByte(' ')
 		}
 	}
-
-	p.Add("q", strings.Join(args, " "))
+	p.Add("q", b.String())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
