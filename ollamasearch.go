@@ -15,13 +15,6 @@ import (
 	"golang.org/x/net/html"
 )
 
-func main() {
-	if err := Main(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
-}
-
 var errUsage = errors.New(`
 Usage: ollamasearch <query>
 
@@ -33,11 +26,29 @@ The query must be the first param, not spread across multiple params. Use
 quotes if you need spaces.
 `[1:])
 
+var envDebug = os.Getenv("OLLAMASEARCHDEBUG") != ""
+
+func vlogf(format string, args ...any) {
+	if envDebug {
+		fmt.Fprintf(os.Stderr, "DEBUG: "+format, args...)
+	}
+}
+
+func main() {
+	if err := Main(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
+
 func Main() error {
 	if len(os.Args) > 2 {
 		return errUsage
 	}
-	query := os.Args[1]
+	var query string
+	if len(os.Args) == 2 {
+		query = os.Args[1]
+	}
 
 	var b strings.Builder
 	p := url.Values{}
@@ -46,8 +57,10 @@ func Main() error {
 		if ok {
 			p.Add("c", c)
 		} else {
+			if b.Len() > 0 {
+				b.WriteByte(' ')
+			}
 			b.WriteString(arg)
-			b.WriteByte(' ')
 		}
 	}
 	p.Add("q", b.String())
@@ -63,7 +76,7 @@ func Main() error {
 		RawQuery: p.Encode(),
 	}).String()
 
-	fmt.Println("Searching:", urlStr)
+	vlogf("GET %s\n", urlStr)
 
 	req, err := http.NewRequestWithContext(ctx, "GET", urlStr, nil)
 	if err != nil {
