@@ -22,7 +22,7 @@ llama3.1                     tools      Llama 3.1 is a new state-of-the-art mode
 Capabilities may be used to filter like:
 
 ```
-; ollamasearch llama has:vision
+; ollamasearch has:vision
 gemma3                vision             The current, most capable model that runs on a single GPU.
 llava                 vision             🌋 LLaVA is a novel end-to-end trained large multimodal model that combines a ...
 llama3.2-vision       vision             Llama 3.2 Vision is a collection of instruction-tuned image reasoning generative...
