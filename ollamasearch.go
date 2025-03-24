@@ -59,6 +59,7 @@ func Main() error {
 		return err
 	}
 	req.Header.Set("User-Agent", "OllamaSearch/0.1")
+	req.Header.Set("Hx-Request", "true") // we only care about results, not the full layout
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
