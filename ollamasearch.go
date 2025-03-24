@@ -22,16 +22,28 @@ func main() {
 	}
 }
 
-var errUsage = errors.New("Usage: ollamasearch <query>")
+var errUsage = errors.New(`
+Usage: ollamasearch <query>
+
+Use "has:" to filter by capability. For example:
+
+	ollamasearch "has:tools has:vision gemma"
+
+The query must be the first param, not spread across multiple params. Use
+quotes if you need spaces.
+`[1:])
 
 func Main() error {
+	if len(os.Args) > 2 {
+		return errUsage
+	}
+	query := os.Args[1]
+
 	var b strings.Builder
 	p := url.Values{}
-	args := slices.Clone(os.Args[1:])
-	for i, arg := range args {
+	for arg := range strings.FieldsSeq(query) {
 		c, ok := strings.CutPrefix(arg, "has:")
 		if ok {
-			args[i] = "" // do not include in query
 			p.Add("c", c)
 		} else {
 			b.WriteString(arg)
@@ -50,6 +62,8 @@ func Main() error {
 		Path:     "/search",
 		RawQuery: p.Encode(),
 	}).String()
+
+	fmt.Println("Searching:", urlStr)
 
 	req, err := http.NewRequestWithContext(ctx, "GET", urlStr, nil)
 	if err != nil {
