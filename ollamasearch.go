@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cmp"
 	"context"
 	"errors"
 	"fmt"
@@ -26,7 +27,10 @@ The query must be the first param, not spread across multiple params. Use
 quotes if you need spaces.
 `[1:])
 
-var envDebug = os.Getenv("OLLAMASEARCHDEBUG") != ""
+var (
+	envDebug         = os.Getenv("OLLAMASEARCHDEBUG") != ""
+	envOllamaBaseURL = cmp.Or(os.Getenv("OLLAMA_BASE_URL"), "https://ollama.com")
+)
 
 func vlogf(format string, args ...any) {
 	if envDebug {
@@ -68,13 +72,7 @@ func Main() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	// example: https://ollama.com/search?c=tools&q=smol
-	urlStr := (&url.URL{
-		Scheme:   "https",
-		Host:     "ollama.com",
-		Path:     "/search",
-		RawQuery: p.Encode(),
-	}).String()
+	urlStr := fmt.Sprintf("%s/search?%s", envOllamaBaseURL, p.Encode())
 
 	vlogf("GET %s\n", urlStr)
 
